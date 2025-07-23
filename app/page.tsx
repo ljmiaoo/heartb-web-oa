@@ -1,6 +1,4 @@
 "use client";
-import { Snippet } from "@nextui-org/snippet";
-import { Code } from "@nextui-org/code";
 import { Icon } from "@iconify/react";
 import {
   Button,
@@ -14,40 +12,41 @@ import {
   SelectItem,
 } from "@nextui-org/react";
 import { cn } from "@nextui-org/theme";
-import React from "react";
-
-import { title } from "@/components/primitives";
+import React, { useMemo, useState } from "react";
+import useSWR from "swr";
 
 export default function Home() {
+  /* ----------------------------- get novel list ----------------------------- */
+  const { data } = useSWR("/api/novel-list");
+  const novels: { key: string; label: string }[] = useMemo(() => {
+    return data?.novels?.map((n: string) => ({ key: n, label: n })) ?? [];
+  }, [data]);
+
+  /* ----------------------------- select a novel ----------------------------- */
+  const [novelId, setNovelId] = useState<string | undefined>();
+  const { data: novelContent } = useSWR(
+    novelId ? `/api/novel/${novelId}` : null,
+  );
+
+  console.log(novelContent)
+
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="inline-block max-w-xl text-center justify-center">
-        <span className={title()}>Place your changes here</span>
-      </div>
-      <div className="mt-8 gap-16">
-        <Snippet hideCopyButton hideSymbol className="gap-4" variant="bordered">
-          <span>
-            Get started by editing <Code color="primary">app/page.tsx</Code>
-          </span>
-          <span>Please feel free to use the example components below.</span>
-        </Snippet>
-      </div>
-      <div className="pt-6 w-48">
-        <Select
-          items={[
-            { key: "story-1", label: "story-1" },
-            { key: "story-2", label: "story-2" },
-            { key: "story-3", label: "story-3" },
-          ]}
-          label="Story"
-          placeholder="Select a story"
-        >
-          {(story) => <SelectItem key={story.key}>{story.label}</SelectItem>}
-        </Select>
-      </div>
-
-      <div className="pt-6">
-        <div className="flex flex-row ">
+      <div>
+        <div className="w-48">
+          <Select
+            items={novels}
+            label="Story"
+            placeholder="Select a story"
+            value={novelId}
+            onChange={(e) => {
+              setNovelId(e.target.value);
+            }}
+          >
+            {(story) => <SelectItem key={story.key}>{story.label}</SelectItem>}
+          </Select>
+        </div>
+        <div className="pt-6 flex flex-row ">
           <div
             className={cn(
               "relative flex h-full w-96 max-w-[384px] flex-1 flex-col !border-r-small border-divider pr-6 transition-[transform,opacity,margin] duration-250 ease-in-out",
