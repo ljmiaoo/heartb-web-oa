@@ -12,14 +12,28 @@ export interface ProvidersProps {
   themeProps?: ThemeProviderProps;
 }
 
-const fetcher = (...args: Parameters<typeof fetch>) =>
-  fetch.apply(this, args).then((res) => {
+const getUrl = (url: string) => {
+  const path = `${process.env.NEXT_PUBLIC_BASE_PATH || "/"}${url}`.replace(
+    "//",
+    "/",
+  );
+
+  return path;
+};
+
+const fetcher = (...args: Parameters<typeof fetch>) => {
+  if (typeof args[0] === "string") {
+    args[0] = getUrl(args[0]);
+  }
+
+  return fetch.apply(this, args).then((res) => {
     if (res.headers.get("content-type")?.includes("application/json")) {
       return res.json();
     }
 
     return res.text();
   });
+};
 
 export function Providers({ children, themeProps }: ProvidersProps) {
   const router = useRouter();
