@@ -273,11 +273,11 @@ export default function Home() {
           </header>
           <div className="w-full flex-1 flex-col flex">
             <div className="flex flex-1 flex-col items-start pb-6">
-              <div className="relative w-full min-h-[400px] flex-1 bg-slate-100 dark:bg-gray-800 rounded-lg">
+              <div className="relative w-full min-h-[400px] flex-1 bg-slate-100 dark:bg-gray-200 rounded-lg">
                 <div className="absolute inset-x-4 top-4 z-10 flex justify-between items-center">
                   <div className="flex justify-between">
                     <Button
-                      className="mr-2 bg-white dark:bg-gray-700"
+                      className="mr-2 bg-white dark:bg-gray-200"
                       size="sm"
                       startContent={
                         <Icon
@@ -293,7 +293,7 @@ export default function Home() {
                     </Button>
                     {edited && (
                       <Button
-                        className="mr-2 bg-white dark:bg-gray-700"
+                        className="mr-2 bg-white dark:bg-gray-200"
                         size="sm"
                         startContent={
                           <Icon
@@ -311,7 +311,7 @@ export default function Home() {
                   </div>
 
                   <Button
-                    className="mr-2 bg-white dark:bg-gray-700"
+                    className="mr-2 bg-white dark:bg-gray-200"
                     size="sm"
                     startContent={
                       <Icon
