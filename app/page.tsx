@@ -332,7 +332,7 @@ export default function Home() {
                       ref={textareaRef}
                       className="flex-1 outline-none resize-none rounded-md border border-transparent bg-slate-100 dark:bg-gray-200 text-gray-900"
                       placeholder="-- Empty --"
-                      value={chapter?.content}
+                      value={chapter?.content || ""}
                       onChange={(e) => {
                         setEdited(true);
                         cursorPositionRef.current = e.target.selectionStart;
