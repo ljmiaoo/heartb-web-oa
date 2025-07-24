@@ -14,6 +14,12 @@ import {
 import { cn } from "@nextui-org/theme";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
 
 import { splitChapter } from "@/app/lib";
 
@@ -26,7 +32,7 @@ export default function Home() {
 
   /* ----------------------------- select a novel ----------------------------- */
   const [novelId, setNovelId] = useState<string | undefined>();
-  const [chapterIndex, setChapterIndex] = useState(0);
+  const [chapterKey, setChapterKey] = useState(0);
   const [novelContent, setNovelContent] = useState<string>("");
 
   useSWR(novelId ? `/api/novel/${novelId}` : null, null, {
@@ -44,8 +50,8 @@ export default function Home() {
   }, [novelContent]);
 
   const chapter = useMemo(() => {
-    return chapters[chapterIndex];
-  }, [chapterIndex, chapters]);
+    return chapters.find((f) => f.key === chapterKey);
+  }, [chapterKey, chapters]);
 
   const cursorPositionRef = useRef<number>();
 
@@ -76,6 +82,58 @@ export default function Home() {
     }
   };
 
+  const deleteChapter = (key: number) => {
+    const newChapters = chapters.filter((f) => f.key !== key);
+
+    setChapters(newChapters);
+    if (key === chapterKey) {
+      setChapterKey(newChapters[0]?.key ?? 0);
+    }
+  };
+
+  const combineChapter = (key: number) => {
+    const index = chapters.findIndex((p) => p.key === key);
+    const nextItem = chapters[index + 1];
+
+    if (index > -1 && nextItem) {
+      setChapters(
+        chapters.filter((f, i) => {
+          if (i === index + 1) {
+            return false;
+          }
+          f.content = f.content + nextItem.pureContent;
+
+          return true;
+        }),
+      );
+    }
+  };
+
+  const items = [
+    {
+      key: "combine",
+      label: (
+        <div className="flex items-center gap-1">
+          <Icon
+            className="text-default-500"
+            icon="material-symbols:vertical-align-center"
+            width={20}
+          />
+          Combine with next chapter
+        </div>
+      ),
+    },
+    {
+      key: "delete",
+      label: (
+        <div className="flex items-center gap-1">
+          <Icon icon="material-symbols:delete" width={20} />
+          Delete this chapter
+        </div>
+      ),
+    },
+  ];
+
   return (
     <section className="flex flex-col h-screen items-center">
       <div className="py-3 px-6 border-b w-full">
@@ -87,7 +145,7 @@ export default function Home() {
             value={novelId}
             onChange={(e) => {
               setNovelId(e.target.value);
-              setChapterIndex(0);
+              setChapterKey(0);
             }}
           >
             {(story) => <SelectItem key={story.key}>{story.label}</SelectItem>}
@@ -118,16 +176,16 @@ export default function Home() {
                     isPressable
                     className={cn(
                       `max-w-[384px] border-1 border-divider/15`,
-                      chapterIndex === item.key && `bg-themeBlue/20`,
+                      chapterKey === item.key && `bg-themeBlue/20`,
                     )}
                     shadow="none"
                     onClick={() => {
-                      setChapterIndex(item.key);
+                      setChapterKey(item.key);
                     }}
                   >
                     <CardHeader className="flex items-center justify-between">
                       <div className="flex gap-1.5">
-                        {chapterIndex === item.key && (
+                        {chapterKey === item.key && (
                           <Chip
                             className="mr-1 text-themeBlue bg-themeBlue/20"
                             radius="sm"
@@ -140,6 +198,44 @@ export default function Home() {
                         <p className="text-left mr-1 line-clamp-1">
                           {item.title}
                         </p>
+                        <Dropdown>
+                          <DropdownTrigger>
+                            <Icon
+                              className="text-default-400 absolute right-2 outline-none"
+                              icon="material-symbols:more-horiz"
+                              width={24}
+                            />
+                          </DropdownTrigger>
+                          <DropdownMenu
+                            aria-label="Dynamic Actions"
+                            items={items}
+                          >
+                            {(action) => (
+                              <DropdownItem
+                                key={action.key}
+                                className={
+                                  action.key === "delete" ? "text-danger" : ""
+                                }
+                                color={
+                                  action.key === "delete" ? "danger" : "default"
+                                }
+                                onClick={() => {
+                                  switch (action.key) {
+                                    case "delete":
+                                      deleteChapter(item.key);
+                                      break;
+                                    case "combine":
+                                      combineChapter(item.key);
+                                    default:
+                                      break;
+                                  }
+                                }}
+                              >
+                                {action.label}
+                              </DropdownItem>
+                            )}
+                          </DropdownMenu>
+                        </Dropdown>
                       </div>
                     </CardHeader>
 
@@ -236,8 +332,8 @@ export default function Home() {
                         setEdited(true);
                         cursorPositionRef.current = e.target.selectionStart;
                         setChapters((prev) =>
-                          prev.map((p, i) =>
-                            i === chapterIndex
+                          prev.map((p) =>
+                            p.key === chapterKey
                               ? { ...p, content: e.target.value }
                               : p,
                           ),
