@@ -65,7 +65,11 @@ export default function Home() {
   const insertChapterSplit = () => {
     if (textareaRef.current) {
       textareaRef.current.focus();
-      document.execCommand("insertText", false, "\n---CHAPTER END---\n");
+      document.execCommand(
+        "insertText",
+        false,
+        "\n\n---CHAPTER END---\n\nChapter\n",
+      );
     }
   };
 
@@ -181,7 +185,7 @@ export default function Home() {
                     shadow="none"
                     onClick={() => {
                       setChapterKey(item.key);
-                      setEdited(false)
+                      setEdited(false);
                     }}
                   >
                     <CardHeader className="flex items-center justify-between">
