@@ -181,6 +181,7 @@ export default function Home() {
                     shadow="none"
                     onClick={() => {
                       setChapterKey(item.key);
+                      setEdited(false)
                     }}
                   >
                     <CardHeader className="flex items-center justify-between">
